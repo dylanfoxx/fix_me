@@ -1,5 +1,54 @@
-// This group of tests should work during cargo test(release or debug) as well as cargo bench
-// This is a simple macro but we may need to test more extensively 
+//! A very simple macro that lets you write temporary code that WILL NOT build in release mode. You can still run debug and test --release without issue. 
+//!
+//! fix_me has no overhead on any release or debug code, instead it provides a compile error if any fix_me code is still in the project at release time. 
+//!
+//!
+//! Feature flag unfixed_code will allow you to compile release code even with fix_me still in your code base.
+//!
+//!
+//! Simple rust hello world with fix_me
+
+//! ```
+//! use fix_me::fix_me;
+//!
+//! fn main() {
+//!     fix_me!({
+//!         println!("Hello, world!");
+//!     });   
+//! }
+//! ```
+
+//! This is cargo expand output with fix_me.
+
+//! ```
+//! fn main() {
+//!     {
+//!         ::std::io::_print(::core::fmt::Arguments::new_v1(
+//!             &["Hello, world!\n"],
+//!             &match () {
+//!                 () => [],
+//!             },
+//!         ));
+//!     };
+//! }
+//! ```
+
+//! this is Cargo expand output without fix_me.
+
+//! ```
+//! fn main() {
+//!     {
+//!         ::std::io::_print(::core::fmt::Arguments::new_v1(
+//!             &["Hello, world!\n"],
+//!             &match () {
+//!                 () => [],
+//!             },
+//!         ));
+//!     };
+//! }
+//! ```
+
+// This group of tests should work during cargo test(release or debug). cargo bench still needs to be tested 
 #[cfg(test)]
 mod tests {
     use super::fix_me;
@@ -35,7 +84,6 @@ mod tests {
 
 
 // This set of tests are used to make sure we can build in debug mode but not release
-// May need to remove doc
 #[cfg(feature = "build_tests")]
 mod build_tests {
     use super::fix_me;
@@ -53,7 +101,7 @@ mod build_tests {
     
 }
 
-
+/// A simple macro that errors(::std::compile_error!) if not in test, debug mode or feature unfixed_code is not set
 #[macro_export]
 macro_rules! fix_me {
     ({ $( $token:tt )* }) => {
