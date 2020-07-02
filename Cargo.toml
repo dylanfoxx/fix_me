@@ -2,6 +2,7 @@
 name = "fix_me"
 version = "0.1.0"
 license = "MIT"
+description = "A very simple macro that lets you write temporary code that WILL NOT build in release mode."
 authors = ["Dylan Gebel <dylanfoxx@optonline.net>"]
 edition = "2018"
 
