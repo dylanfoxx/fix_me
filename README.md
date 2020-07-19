@@ -17,33 +17,3 @@
      });   
  }
  ```
-
- This is cargo expand output with fix_me.
-
- ```
- fn main() {
-     {
-         ::std::io::_print(::core::fmt::Arguments::new_v1(
-             &["Hello, world!\n"],
-             &match () {
-                 () => [],
-             },
-         ));
-     };
- }
- ```
-
- this is Cargo expand output without fix_me.
-
- ```
- fn main() {
-     {
-         ::std::io::_print(::core::fmt::Arguments::new_v1(
-             &["Hello, world!\n"],
-             &match () {
-                 () => [],
-             },
-         ));
-     };
- }
- ```

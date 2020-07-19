@@ -1,13 +1,13 @@
+#![no_std]
 //! A very simple macro that lets you write temporary code that WILL NOT build in release mode. You can still run debug and test --release without issue. 
 //!
 //! fix_me has no overhead on any release or debug code, instead it provides a compile error if any fix_me code is still in the project at release time. 
-//!
 //!
 //! Feature flag unfixed_code will allow you to compile release code even with fix_me still in your code base.
 //!
 //!
 //! Simple rust hello world with fix_me
-
+//!
 //! ```
 //! use fix_me::fix_me;
 //!
@@ -15,36 +15,6 @@
 //!     fix_me!({
 //!         println!("Hello, world!");
 //!     });   
-//! }
-//! ```
-
-//! This is cargo expand output with fix_me.
-
-//! ```
-//! fn main() {
-//!     {
-//!         ::std::io::_print(::core::fmt::Arguments::new_v1(
-//!             &["Hello, world!\n"],
-//!             &match () {
-//!                 () => [],
-//!             },
-//!         ));
-//!     };
-//! }
-//! ```
-
-//! this is Cargo expand output without fix_me.
-
-//! ```
-//! fn main() {
-//!     {
-//!         ::std::io::_print(::core::fmt::Arguments::new_v1(
-//!             &["Hello, world!\n"],
-//!             &match () {
-//!                 () => [],
-//!             },
-//!         ));
-//!     };
 //! }
 //! ```
 
@@ -101,14 +71,17 @@ mod build_tests {
     
 }
 
-/// A simple macro that errors(::std::compile_error!) if not in test, debug mode or feature unfixed_code is not set
+/// A simple macro that errors(::core::compile_error!) if not in test, debug mode or feature unfixed_code is not set
+
+// We "should" be able to use debug in the default profile. However for some reason we need to use debug_assert.
+// This seems to be the correct way but may need to be changed.
 #[macro_export]
 macro_rules! fix_me {
     ({ $( $token:tt )* }) => {
         #[cfg(not(any(debug_assertions, test, feature = "unfixed_code")))]
         {
-            ::std::compile_error!("Fix the code or use the 'unfixed_code' feature");
-        } 
+            ::core::compile_error!("Fix the code or use the 'unfixed_code' feature");
+        }
 
         $( $token )*
     };
