@@ -1,6 +1,6 @@
 [package]
 name = "fix_me"
-version = "0.1.1"
+version = "0.1.2"
 license = "MIT"
 
 readme = "README.md"
@@ -16,5 +16,3 @@ edition = "2018"
 [features]
 
 unfixed_code = []
-
-build_tests = []

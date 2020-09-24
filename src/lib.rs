@@ -1,88 +1,59 @@
 #![no_std]
-//! A very simple macro that lets you write temporary code that WILL NOT build in release mode. You can still run debug and test --release without issue. 
+//! Fix me is useful for writing temporary code that will be fixed later.
+//! It replaces comments like 
+//! ```text
+//! //FIXME:Rework error handling 
+//!    or
+//! //TODO:Add logging
+//! ```
 //!
-//! fix_me has no overhead on any release or debug code, instead it provides a compile error if any fix_me code is still in the project at release time. 
+//! Unlike comments fix_me is enforced by the compiler.
+//!   
+//! fix_me is a simple macro that lets you write temporary code that WILL NOT build in release mode.
+//! - You can still compile debug builds and run test --release without issue. 
+//! - fix_me has no overhead on any release or debug code, instead it provides a compile error if any fix_me code is still in the project at release time.
 //!
-//! Feature flag unfixed_code will allow you to compile release code even with fix_me still in your code base.
-//!
-//!
-//! Simple rust hello world with fix_me
+//! Simple fix_me hello world
 //!
 //! ```
-//! use fix_me::fix_me;
+//! //Use on functions
+//! fix_me::fix_me!(
+//!     fn only_false() -> bool {
+//!         use fix_me::fix_me;
+//!         //Or in functions
+//!         fix_me!(
+//!            return true;
+//!         );
+//!     }
+//! );
 //!
 //! fn main() {
-//!     fix_me!({
-//!         println!("Hello, world!");
-//!     });   
+//!     match only_false() {
+//!         false => println!("Hello"),
+//!         _ => {}
+//!     }       
 //! }
 //! ```
-
-// This group of tests should work during cargo test(release or debug). cargo bench still needs to be tested 
-#[cfg(test)]
-mod tests {
-    use super::fix_me;
-
-    #[test]
-    fn macro_test() {
-        fix_me!({
-            //Some code we need to fix
-        });
-    }
-
-    #[test]
-    fn scope_test(){
-        fix_me!({
-            let num_thing = 13;
-        });
-
-        assert!(num_thing == 13);
-    }
-
-    #[test]
-    fn  scope_test_2(){
-        let test_string = String::from("test");
-
-        fix_me!({
-            let test_string = String::from("replace");
-        });
-
-        assert!(test_string == "replace");
-    }
-
-}
-
-
-// This set of tests are used to make sure we can build in debug mode but not release
-#[cfg(feature = "build_tests")]
-mod build_tests {
-    use super::fix_me;
-
-    fn does_it_hold(){
-        fix_me!({
-            let mut num = 12;
-        });
-
-        num = 15;
-
-        assert!(num == 15)
-    }
-
-    
-}
+//! 
+//!
+//! It is recommended to add it to the dependencies as you are making changes then remove it as you finish your work.
+//!
+//! Feature flag unfixed_code will allow you to compile release code even with fix_me still in your code base.
 
 /// A simple macro that errors(::core::compile_error!) if not in test, debug mode or feature unfixed_code is not set
 
-// We "should" be able to use debug in the default profile. However for some reason we need to use debug_assert.
+// We "should" be able to use debug in the default profile. However for some reason we need to use debug_assertions.
 // This seems to be the correct way but may need to be changed.
 #[macro_export]
 macro_rules! fix_me {
-    ({ $( $token:tt )* }) => {
+    ( $( $token:tt )* ) => {
         #[cfg(not(any(debug_assertions, test, feature = "unfixed_code")))]
-        {
-            ::core::compile_error!("Fix the code or use the 'unfixed_code' feature");
-        }
-
+        ::core::compile_error!("Fix the code or use the 'unfixed_code' feature");
+        
         $( $token )*
+    };
+    () => {
+        #[cfg(not(any(debug_assertions, test, feature = "unfixed_code")))]
+        ::core::compile_error!("Fix the code or use the 'unfixed_code' feature");
     };
 }
